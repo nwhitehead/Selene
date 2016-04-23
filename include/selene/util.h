@@ -38,6 +38,11 @@ inline void _print() {
     std::cout << std::endl;
 }
 
+template <typename T>
+inline void _print(T arg) {
+    std::cout << arg << std::endl;
+}
+
 template <typename T, typename... Ts>
 inline void _print(T arg, Ts... args) {
     std::cout << arg << ", ";

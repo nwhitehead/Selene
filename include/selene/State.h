@@ -121,6 +121,20 @@ public:
         }
         return true;
     }
+    bool operator()(const char *code, const char *tag) {
+        ResetStackOnScopeExit savedStack(_l);
+        int status = luaL_loadbuffer(_l, code, std::strlen(code), tag);
+        if (status != LUA_OK) {
+            _exception_handler->Handle_top_of_stack(status, _l);
+            return false;
+        }
+        status = lua_pcall(_l, 0, LUA_MULTRET, 0);
+        if(status == LUA_OK) {
+            return true;
+        }
+        _exception_handler->Handle_top_of_stack(status, _l);
+        return false;
+    }
     void ForceGC() {
         lua_gc(_l, LUA_GCCOLLECT, 0);
     }
