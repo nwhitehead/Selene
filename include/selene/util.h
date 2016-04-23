@@ -35,17 +35,17 @@ inline std::ostream &operator<<(std::ostream &os, lua_State *l) {
 }
 
 inline void _print() {
-    std::cout << std::endl;
+    std::cerr << std::endl;
 }
 
 template <typename T>
 inline void _print(T arg) {
-    std::cout << arg << std::endl;
+    std::cerr << arg << std::endl;
 }
 
 template <typename T, typename... Ts>
 inline void _print(T arg, Ts... args) {
-    std::cout << arg << ", ";
+    std::cerr << arg << ", ";
     _print(args...);
 }
 
@@ -57,7 +57,7 @@ inline bool check(lua_State *L, int code) {
 #endif
         return true;
     } else {
-        std::cout << lua_tostring(L, -1) << std::endl;
+        std::cerr << lua_tostring(L, -1) << std::endl;
         return false;
     }
 }

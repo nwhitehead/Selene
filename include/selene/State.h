@@ -10,7 +10,22 @@
 #include "util.h"
 #include <vector>
 
+#include "lua.h"
+
 namespace sel {
+
+static int traceback(lua_State *L) {
+    if (!lua_isstring(L, 1)) {
+        if (lua_isnoneornil(L, 1) ||
+            !luaL_callmeta(L, 1, "__tostring") ||
+            !lua_isstring(L, -1))
+            return 1;
+        lua_remove(L, 1);
+    }
+    luaL_traceback(L, L, lua_tostring(L, 1), 1);
+    return 1;
+}
+
 class State {
 private:
     lua_State *_l;
@@ -121,14 +136,17 @@ public:
         }
         return true;
     }
-    bool operator()(const char *code, const char *tag) {
+    bool operator()(const char *code, const char *tag, bool show_traceback) {
         ResetStackOnScopeExit savedStack(_l);
+        if (show_traceback) {
+            lua_pushcfunction(_l, traceback);
+        }
         int status = luaL_loadbuffer(_l, code, std::strlen(code), tag);
         if (status != LUA_OK) {
             _exception_handler->Handle_top_of_stack(status, _l);
             return false;
         }
-        status = lua_pcall(_l, 0, LUA_MULTRET, 0);
+        status = lua_pcall(_l, 0, LUA_MULTRET, show_traceback ? -2 : 0);
         if(status == LUA_OK) {
             return true;
         }
